@@ -1,0 +1,40 @@
+topology:
+  name: "L3 Routing Test Topology"
+  
+nodes:
+  - name: "R1"
+    loopback: "1.1.1.1"
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.1.1"
+        mask: 24
+        
+  - name: "R2"
+    loopback: "2.2.2.2"
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.1.2"
+        mask: 24
+      - name: "eth1"
+        ip: "10.0.2.1"
+        mask: 24
+        
+  - name: "R3"
+    loopback: "3.3.3.3"
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.2.2"
+        mask: 24
+
+links:
+  - from_node: "R1"
+    from_interface: "eth0"
+    to_node: "R2"
+    to_interface: "eth0"
+    cost: 1
+    
+  - from_node: "R2"
+    from_interface: "eth1"
+    to_node: "R3"
+    to_interface: "eth0"
+    cost: 1

@@ -1,0 +1,65 @@
+# Expected workflow: run LLDP discovery to populate infrastructure adjacencies,
+# then disable LLDP on one switch and compare the next discovery round.
+topology:
+  name: "LLDP Neighbor Discovery"
+  description: "Core, distribution, and access switches advertise LLDP on each connected port so physical adjacencies can be verified."
+  summary: "Run LLDP Discovery · Inspect neighbor tables · Disable one switch and repeat"
+  default_source: "Admin-PC"
+  default_destination: "File-SRV"
+  canvas:
+    width: 1200
+    height: 680
+
+nodes:
+  - name: "Core-SW"
+    type: switch
+    lldp: true
+    position: {x: 600, y: 100}
+    stp_priority: 4096
+    interfaces:
+      - {name: "to-dist", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+
+  - name: "Dist-SW"
+    type: switch
+    lldp: true
+    position: {x: 600, y: 300}
+    stp_priority: 8192
+    interfaces:
+      - {name: "to-core", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+      - {name: "to-acc1", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+      - {name: "to-acc2", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+
+  - name: "Access-SW1"
+    type: switch
+    lldp: true
+    position: {x: 340, y: 500}
+    interfaces:
+      - {name: "uplink", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+      - {name: "admin", mode: access, vlan: 10}
+
+  - name: "Access-SW2"
+    type: switch
+    lldp: true
+    position: {x: 860, y: 500}
+    interfaces:
+      - {name: "uplink", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+      - {name: "server", mode: access, vlan: 10}
+
+  - name: "Admin-PC"
+    type: host
+    position: {x: 100, y: 500}
+    interfaces:
+      - {name: "eth0", ip: "10.10.10.10", mask: 24}
+
+  - name: "File-SRV"
+    type: host
+    position: {x: 1100, y: 500}
+    interfaces:
+      - {name: "eth0", ip: "10.10.10.20", mask: 24}
+
+links:
+  - {from_node: "Core-SW", from_interface: "to-dist", to_node: "Dist-SW", to_interface: "to-core", cost: 4}
+  - {from_node: "Dist-SW", from_interface: "to-acc1", to_node: "Access-SW1", to_interface: "uplink", cost: 4}
+  - {from_node: "Dist-SW", from_interface: "to-acc2", to_node: "Access-SW2", to_interface: "uplink", cost: 4}
+  - {from_node: "Admin-PC", from_interface: "eth0", to_node: "Access-SW1", to_interface: "admin", cost: 4}
+  - {from_node: "Access-SW2", from_interface: "server", to_node: "File-SRV", to_interface: "eth0", cost: 4}

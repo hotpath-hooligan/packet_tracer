@@ -1,0 +1,73 @@
+# Expected result: User-PC reaches App-SRV through Primary-RTR because the
+# 10.50.10.0/24 route is preferred over the /16 aggregate and default routes.
+topology:
+  name: "Longest-Prefix Route Selection"
+  description: "Edge-RTR selects a specific /24 through Primary-RTR instead of a covering /16 and default route through Backup-RTR."
+  summary: "10.50.10.20 matches /24 via Primary-RTR · /16 and /0 remain less specific"
+  default_source: "User-PC"
+  default_destination: "App-SRV"
+  canvas:
+    width: 1300
+    height: 700
+
+nodes:
+  - name: "User-PC"
+    type: host
+    position: {x: 100, y: 350}
+    interfaces:
+      - {name: "eth0", ip: "10.0.10.10", mask: 24}
+    routes:
+      - {destination: "0.0.0.0", mask: 0, gateway: "10.0.10.1", interface: "eth0"}
+
+  - name: "Edge-RTR"
+    type: router
+    position: {x: 390, y: 350}
+    interfaces:
+      - {name: "users", ip: "10.0.10.1", mask: 24}
+      - {name: "primary", ip: "192.0.2.1", mask: 30}
+      - {name: "backup", ip: "198.51.100.1", mask: 30}
+    routes:
+      - {destination: "0.0.0.0", mask: 0, gateway: "198.51.100.2", interface: "backup"}
+      - {destination: "10.50.0.0", mask: 16, gateway: "198.51.100.2", interface: "backup"}
+      - {destination: "10.50.10.0", mask: 24, gateway: "192.0.2.2", interface: "primary"}
+
+  - name: "Primary-RTR"
+    type: router
+    position: {x: 770, y: 180}
+    interfaces:
+      - {name: "edge", ip: "192.0.2.2", mask: 30}
+      - {name: "apps", ip: "10.50.10.1", mask: 24}
+    routes:
+      - {destination: "10.0.10.0", mask: 24, gateway: "192.0.2.1", interface: "edge"}
+
+  - name: "Backup-RTR"
+    type: router
+    position: {x: 770, y: 520}
+    interfaces:
+      - {name: "edge", ip: "198.51.100.2", mask: 30}
+      - {name: "archive", ip: "10.50.20.1", mask: 24}
+    routes:
+      - {destination: "10.0.10.0", mask: 24, gateway: "198.51.100.1", interface: "edge"}
+
+  - name: "App-SRV"
+    type: host
+    position: {x: 1160, y: 180}
+    interfaces:
+      - {name: "eth0", ip: "10.50.10.20", mask: 24}
+    routes:
+      - {destination: "0.0.0.0", mask: 0, gateway: "10.50.10.1", interface: "eth0"}
+
+  - name: "Archive-SRV"
+    type: host
+    position: {x: 1160, y: 520}
+    interfaces:
+      - {name: "eth0", ip: "10.50.20.20", mask: 24}
+    routes:
+      - {destination: "0.0.0.0", mask: 0, gateway: "10.50.20.1", interface: "eth0"}
+
+links:
+  - {from_node: "User-PC", from_interface: "eth0", to_node: "Edge-RTR", to_interface: "users", cost: 1}
+  - {from_node: "Edge-RTR", from_interface: "primary", to_node: "Primary-RTR", to_interface: "edge", cost: 10}
+  - {from_node: "Edge-RTR", from_interface: "backup", to_node: "Backup-RTR", to_interface: "edge", cost: 20}
+  - {from_node: "Primary-RTR", from_interface: "apps", to_node: "App-SRV", to_interface: "eth0", cost: 1}
+  - {from_node: "Backup-RTR", from_interface: "archive", to_node: "Archive-SRV", to_interface: "eth0", cost: 1}

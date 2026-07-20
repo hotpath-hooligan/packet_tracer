@@ -1,0 +1,57 @@
+# Expected result: the ping fails after the echo request reaches Server-PC.
+# Server-PC has no route back to the client subnet for its echo reply.
+topology:
+  name: "Missing Return Route"
+  description: "The echo request reaches the server, but the server has no route for the echo reply."
+  summary: "Server-PC has no route to 192.168.10.0/24 · Expected failure"
+  default_source: "Client-PC"
+  default_destination: "Server-PC"
+  canvas:
+    width: 1000
+    height: 520
+
+nodes:
+  - name: "Client-PC"
+    type: host
+    position: {x: 180, y: 260}
+    interfaces:
+      - name: "eth0"
+        ip: "192.168.10.10"
+        mask: 24
+    routes:
+      - destination: "192.168.20.0"
+        mask: 24
+        gateway: "192.168.10.1"
+        interface: "eth0"
+
+  - name: "Gateway-RTR"
+    type: router
+    position: {x: 500, y: 260}
+    interfaces:
+      - name: "client-net"
+        ip: "192.168.10.1"
+        mask: 24
+      - name: "server-net"
+        ip: "192.168.20.1"
+        mask: 24
+
+  - name: "Server-PC"
+    type: host
+    position: {x: 820, y: 260}
+    interfaces:
+      - name: "eth0"
+        ip: "192.168.20.20"
+        mask: 24
+
+links:
+  - from_node: "Client-PC"
+    from_interface: "eth0"
+    to_node: "Gateway-RTR"
+    to_interface: "client-net"
+    cost: 1
+
+  - from_node: "Gateway-RTR"
+    from_interface: "server-net"
+    to_node: "Server-PC"
+    to_interface: "eth0"
+    cost: 1

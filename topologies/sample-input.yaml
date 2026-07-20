@@ -1,0 +1,119 @@
+# Topology input example
+#
+# Copy this file and replace the example values with your own topology.
+# Text after a "#" is a YAML comment and is ignored by the simulator.
+# All currently supported input fields are demonstrated below.
+#
+# Important interface rule:
+# - An interface with `ip` and `mask` is a Layer 3 (routed) interface.
+# - An interface without `ip` is a Layer 2 interface and can use the VLAN fields.
+
+topology:                         # Required: contains general topology information.
+  name: "Customer VLAN Example"  # Required: display name, maximum 32 bytes.
+  description: "Hosts communicate across two VLANs through a Layer 3 switch." # Browser subtitle.
+  summary: "H1 · VLAN 10 → SW1 → H2 · VLAN 20" # Browser scenario summary.
+  default_source: "H1"           # Browser's initially selected ping source.
+  default_destination: "H2"      # Browser's initially selected ping destination.
+  canvas:                         # Required when this topology will be rendered in the browser.
+    width: 1200                   # Positive canvas width in pixels; maximum 10000.
+    height: 640                   # Positive canvas height in pixels; maximum 10000.
+
+nodes:                            # Required: list of devices; at least one is required.
+  - name: "H1"                   # Required: unique device name, maximum 16 bytes.
+    type: host                    # Optional: `host`, `switch`, or `router`; inferred when omitted.
+    position: {x: 150, y: 160}    # Required for browser rendering; coordinates must be inside `canvas`.
+    loopback: "192.0.2.1"        # Optional: device loopback IPv4 address.
+    interfaces:                   # Optional: device ports; a node supports at most 10.
+      - name: "eth0"             # Required: port name, unique on this node, maximum 16 bytes.
+        ip: "10.10.0.10"         # Makes this an L3 port and assigns its IPv4 address.
+        mask: 24                  # CIDR prefix length for `ip`; valid values are 1 through 32.
+    routes:                       # Optional: static IPv4 routes installed when the file loads.
+      - destination: "10.20.0.0" # Destination IPv4 network address.
+        mask: 24                  # Destination CIDR prefix; valid values are 0 through 32.
+        gateway: "10.10.0.1"     # Next-hop IPv4 address reachable from this node.
+        interface: "eth0"        # Existing local port used to reach the gateway.
+
+  - name: "H2"
+    position: {x: 150, y: 480}
+    loopback: "192.0.2.2"
+    interfaces:
+      - name: "eth0"
+        ip: "10.20.0.20"
+        mask: 24
+    routes:
+      - destination: "10.10.0.0"
+        mask: 24
+        gateway: "10.20.0.1"
+        interface: "eth0"
+
+  - name: "H3"
+    position: {x: 1050, y: 160}
+    loopback: "192.0.2.3"
+    interfaces:
+      - name: "eth0"
+        ip: "10.10.0.30"
+        mask: 24
+
+  - name: "SW1"
+    type: switch
+    lldp: true                      # Optional: enable LLDP initially; defaults to false.
+    stp: true                       # Optional: switches run STP by default; set false to disable it.
+    stp_priority: 4096              # Optional: 0-61440 in steps of 4096; lowest bridge ID wins root.
+    position: {x: 500, y: 320}
+    loopback: "192.0.2.101"
+    vlan_interfaces:              # Optional: switched virtual interfaces used as VLAN gateways.
+      - vlan: 10                  # VLAN ID served by this SVI; valid values are 1 through 4094.
+        ip: "10.10.0.1"          # Gateway IPv4 address assigned to the SVI.
+        mask: 24                  # SVI CIDR prefix length; valid values are 1 through 32.
+      - vlan: 20
+        ip: "10.20.0.1"
+        mask: 24
+    interfaces:
+      - name: "access10"
+        mode: "access"            # L2 port type: `access` or `trunk`; defaults to `access`.
+        vlan: 10                  # Untagged VLAN for an access port; defaults to VLAN 1.
+      - name: "access20"
+        mode: "access"
+        vlan: 20
+      - name: "trunk1"
+        mode: "trunk"
+        native_vlan: 1            # VLAN sent untagged on the trunk; defaults to VLAN 1.
+        allowed_vlans: [10, 20]   # VLANs accepted by the trunk; 1-4094, with at most 10 entries.
+
+  - name: "SW2"
+    lldp: true
+    position: {x: 850, y: 320}
+    loopback: "192.0.2.102"
+    interfaces:
+      - name: "trunk1"
+        mode: "trunk"
+        native_vlan: 1
+        allowed_vlans: [10, 20]
+      - name: "access10"
+        mode: "access"
+        vlan: 10
+
+links:                            # Optional: physical point-to-point connections between ports.
+  - from_node: "H1"              # Required per link: node at the first end.
+    from_interface: "eth0"       # Required: existing port on `from_node`.
+    to_node: "SW1"               # Required: node at the other end.
+    to_interface: "access10"     # Required: existing port on `to_node`.
+    cost: 1                       # Optional link/STP cost; STP uses default cost 19 when 0/omitted.
+
+  - from_node: "H2"
+    from_interface: "eth0"
+    to_node: "SW1"
+    to_interface: "access20"
+    cost: 1
+
+  - from_node: "SW1"
+    from_interface: "trunk1"
+    to_node: "SW2"
+    to_interface: "trunk1"
+    cost: 1
+
+  - from_node: "H3"
+    from_interface: "eth0"
+    to_node: "SW2"
+    to_interface: "access10"
+    cost: 1

@@ -1,0 +1,40 @@
+topology:
+  name: "Linear Topology"
+  
+nodes:
+  - name: "R0"
+    loopback: "127.0.0.1"
+    interfaces:
+      - name: "eth0/0"
+        ip: "10.1.1.1"
+        mask: 24
+        
+  - name: "R1"
+    loopback: "127.0.0.2"
+    interfaces:
+      - name: "eth0/1"
+        ip: "10.1.1.2"
+        mask: 24
+      - name: "eth1/0"
+        ip: "10.1.2.1"
+        mask: 24
+        
+  - name: "R2"
+    loopback: "127.0.0.3"
+    interfaces:
+      - name: "eth1/1"
+        ip: "10.1.2.2"
+        mask: 24
+
+links:
+  - from_node: "R0"
+    from_interface: "eth0/0"
+    to_node: "R1"
+    to_interface: "eth0/1"
+    cost: 1
+    
+  - from_node: "R1"
+    from_interface: "eth1/0"
+    to_node: "R2"
+    to_interface: "eth1/1"
+    cost: 1

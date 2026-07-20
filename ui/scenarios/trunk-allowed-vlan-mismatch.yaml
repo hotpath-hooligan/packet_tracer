@@ -1,0 +1,59 @@
+# Expected result: VLAN 20 traffic fails at Access-SW2 because VLAN 20 is
+# missing from its trunk allowed list. VLAN 10 remains available across the trunk.
+topology:
+  name: "Trunk Allowed VLAN Mismatch"
+  description: "The trunk allows VLANs 10 and 20 on Access-SW1 but only VLAN 10 on Access-SW2."
+  summary: "VLAN 20 tagged frame → Access-SW2 trunk denies VLAN 20 · Expected failure"
+  default_source: "Users-A"
+  default_destination: "Users-B"
+  canvas:
+    width: 1200
+    height: 620
+
+nodes:
+  - name: "IT-A"
+    type: host
+    position: {x: 120, y: 150}
+    interfaces:
+      - {name: "eth0", ip: "10.10.10.11", mask: 24}
+
+  - name: "Users-A"
+    type: host
+    position: {x: 120, y: 450}
+    interfaces:
+      - {name: "eth0", ip: "10.10.20.11", mask: 24}
+
+  - name: "Access-SW1"
+    type: switch
+    position: {x: 410, y: 300}
+    interfaces:
+      - {name: "it-port", mode: access, vlan: 10}
+      - {name: "user-port", mode: access, vlan: 20}
+      - {name: "uplink", mode: trunk, native_vlan: 99, allowed_vlans: [10, 20, 99]}
+
+  - name: "Access-SW2"
+    type: switch
+    position: {x: 790, y: 300}
+    interfaces:
+      - {name: "uplink", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+      - {name: "it-port", mode: access, vlan: 10}
+      - {name: "user-port", mode: access, vlan: 20}
+
+  - name: "IT-B"
+    type: host
+    position: {x: 1080, y: 150}
+    interfaces:
+      - {name: "eth0", ip: "10.10.10.12", mask: 24}
+
+  - name: "Users-B"
+    type: host
+    position: {x: 1080, y: 450}
+    interfaces:
+      - {name: "eth0", ip: "10.10.20.12", mask: 24}
+
+links:
+  - {from_node: "IT-A", from_interface: "eth0", to_node: "Access-SW1", to_interface: "it-port", cost: 4}
+  - {from_node: "Users-A", from_interface: "eth0", to_node: "Access-SW1", to_interface: "user-port", cost: 4}
+  - {from_node: "Access-SW1", from_interface: "uplink", to_node: "Access-SW2", to_interface: "uplink", cost: 4}
+  - {from_node: "Access-SW2", from_interface: "it-port", to_node: "IT-B", to_interface: "eth0", cost: 4}
+  - {from_node: "Access-SW2", from_interface: "user-port", to_node: "Users-B", to_interface: "eth0", cost: 4}

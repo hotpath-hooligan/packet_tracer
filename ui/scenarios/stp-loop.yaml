@@ -1,0 +1,62 @@
+# Expected result: H1 receives a ping reply from H2 while STP blocks one
+# redundant switch-to-switch path.
+topology:
+  name: "STP Redundant Topology"
+  description: "Three access switches form a redundant Layer 2 triangle; STP elects SW1 as root and blocks one path."
+  summary: "H1 → SW1 → SW2 → H2 · SW3 provides the redundant path"
+  default_source: "H1"
+  default_destination: "H2"
+  canvas:
+    width: 1000
+    height: 520
+
+nodes:
+  - name: "H1"
+    type: host
+    position: {x: 100, y: 170}
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.1.10"
+        mask: 24
+
+  - name: "SW1"
+    type: switch
+    position: {x: 300, y: 170}
+    stp: true
+    stp_priority: 4096
+    interfaces:
+      - {name: "to-sw2", mode: access, vlan: 1}
+      - {name: "to-sw3", mode: access, vlan: 1}
+      - {name: "to-h1", mode: access, vlan: 1}
+
+  - name: "SW2"
+    type: switch
+    position: {x: 700, y: 170}
+    stp_priority: 8192
+    interfaces:
+      - {name: "to-sw1", mode: access, vlan: 1}
+      - {name: "to-sw3", mode: access, vlan: 1}
+      - {name: "to-h2", mode: access, vlan: 1}
+
+  - name: "H2"
+    type: host
+    position: {x: 900, y: 170}
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.1.20"
+        mask: 24
+
+  - name: "SW3"
+    type: switch
+    position: {x: 500, y: 400}
+    stp_priority: 32768
+    interfaces:
+      - {name: "to-sw2", mode: access, vlan: 1}
+      - {name: "to-sw1", mode: access, vlan: 1}
+
+links:
+  - {from_node: "H1", from_interface: "eth0", to_node: "SW1", to_interface: "to-h1", cost: 4}
+  - {from_node: "SW1", from_interface: "to-sw2", to_node: "SW2", to_interface: "to-sw1", cost: 4}
+  - {from_node: "SW2", from_interface: "to-h2", to_node: "H2", to_interface: "eth0", cost: 4}
+  - {from_node: "SW2", from_interface: "to-sw3", to_node: "SW3", to_interface: "to-sw2", cost: 4}
+  - {from_node: "SW3", from_interface: "to-sw1", to_node: "SW1", to_interface: "to-sw3", cost: 4}

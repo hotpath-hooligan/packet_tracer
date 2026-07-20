@@ -1,0 +1,62 @@
+# Expected result: Branch-PC reaches App-SRV through Branch-RTR, Core-RTR,
+# and DC-RTR using reciprocal static routes.
+topology:
+  name: "Static Routing Between Sites"
+  description: "Static routes provide bidirectional reachability between a branch user LAN and a data-center server LAN across three routers."
+  summary: "Branch-PC → Branch-RTR → Core-RTR → DC-RTR → App-SRV"
+  default_source: "Branch-PC"
+  default_destination: "App-SRV"
+  canvas:
+    width: 1400
+    height: 560
+
+nodes:
+  - name: "Branch-PC"
+    type: host
+    position: {x: 100, y: 280}
+    interfaces:
+      - {name: "eth0", ip: "10.10.10.10", mask: 24}
+    routes:
+      - {destination: "0.0.0.0", mask: 0, gateway: "10.10.10.1", interface: "eth0"}
+
+  - name: "Branch-RTR"
+    type: router
+    position: {x: 360, y: 280}
+    interfaces:
+      - {name: "lan", ip: "10.10.10.1", mask: 24}
+      - {name: "wan", ip: "172.16.0.1", mask: 30}
+    routes:
+      - {destination: "10.20.20.0", mask: 24, gateway: "172.16.0.2", interface: "wan"}
+
+  - name: "Core-RTR"
+    type: router
+    position: {x: 700, y: 280}
+    interfaces:
+      - {name: "branch", ip: "172.16.0.2", mask: 30}
+      - {name: "dc", ip: "172.16.0.5", mask: 30}
+    routes:
+      - {destination: "10.10.10.0", mask: 24, gateway: "172.16.0.1", interface: "branch"}
+      - {destination: "10.20.20.0", mask: 24, gateway: "172.16.0.6", interface: "dc"}
+
+  - name: "DC-RTR"
+    type: router
+    position: {x: 1040, y: 280}
+    interfaces:
+      - {name: "wan", ip: "172.16.0.6", mask: 30}
+      - {name: "server", ip: "10.20.20.1", mask: 24}
+    routes:
+      - {destination: "10.10.10.0", mask: 24, gateway: "172.16.0.5", interface: "wan"}
+
+  - name: "App-SRV"
+    type: host
+    position: {x: 1300, y: 280}
+    interfaces:
+      - {name: "eth0", ip: "10.20.20.20", mask: 24}
+    routes:
+      - {destination: "0.0.0.0", mask: 0, gateway: "10.20.20.1", interface: "eth0"}
+
+links:
+  - {from_node: "Branch-PC", from_interface: "eth0", to_node: "Branch-RTR", to_interface: "lan", cost: 1}
+  - {from_node: "Branch-RTR", from_interface: "wan", to_node: "Core-RTR", to_interface: "branch", cost: 10}
+  - {from_node: "Core-RTR", from_interface: "dc", to_node: "DC-RTR", to_interface: "wan", cost: 10}
+  - {from_node: "DC-RTR", from_interface: "server", to_node: "App-SRV", to_interface: "eth0", cost: 1}

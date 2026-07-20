@@ -1,0 +1,54 @@
+# Basic routed ICMP topology
+#
+# H1 (10.0.1.2/24) --- R1 --- (10.0.2.2/24) H2
+
+topology:
+  name: "Router ICMP"
+
+nodes:
+  - name: H1
+    type: host
+    interfaces:
+      - name: eth0
+        ip: 10.0.1.2
+        mask: 24
+    routes:
+      - destination: 10.0.2.0
+        mask: 24
+        gateway: 10.0.1.1
+        interface: eth0
+
+  - name: R1
+    type: router
+    interfaces:
+      - name: eth0
+        ip: 10.0.1.1
+        mask: 24
+      - name: eth1
+        ip: 10.0.2.1
+        mask: 24
+
+  - name: H2
+    type: host
+    interfaces:
+      - name: eth0
+        ip: 10.0.2.2
+        mask: 24
+    routes:
+      - destination: 10.0.1.0
+        mask: 24
+        gateway: 10.0.2.1
+        interface: eth0
+
+links:
+  - from_node: H1
+    from_interface: eth0
+    to_node: R1
+    to_interface: eth0
+    cost: 1
+
+  - from_node: R1
+    from_interface: eth1
+    to_node: H2
+    to_interface: eth0
+    cost: 1

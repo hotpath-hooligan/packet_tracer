@@ -1,0 +1,52 @@
+# Expected result: Client-A receives a ping reply from Client-B.
+# Both hosts share the same IPv4 subnet and VLAN, so no router is needed.
+topology:
+  name: "Switched LAN Connectivity"
+  description: "Two clients in VLAN 10 exchange ARP and ICMP through one switched LAN."
+  summary: "Client-A → Access-SW → Client-B · Expected success"
+  default_source: "Client-A"
+  default_destination: "Client-B"
+  canvas:
+    width: 1000
+    height: 520
+
+nodes:
+  - name: "Client-A"
+    type: host
+    position: {x: 180, y: 260}
+    interfaces:
+      - name: "eth0"
+        ip: "192.168.10.10"
+        mask: 24
+
+  - name: "Access-SW"
+    type: switch
+    position: {x: 500, y: 260}
+    interfaces:
+      - name: "client-a"
+        mode: access
+        vlan: 10
+      - name: "client-b"
+        mode: access
+        vlan: 10
+
+  - name: "Client-B"
+    type: host
+    position: {x: 820, y: 260}
+    interfaces:
+      - name: "eth0"
+        ip: "192.168.10.20"
+        mask: 24
+
+links:
+  - from_node: "Client-A"
+    from_interface: "eth0"
+    to_node: "Access-SW"
+    to_interface: "client-a"
+    cost: 1
+
+  - from_node: "Access-SW"
+    from_interface: "client-b"
+    to_node: "Client-B"
+    to_interface: "eth0"
+    cost: 1

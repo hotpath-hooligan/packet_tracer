@@ -1,0 +1,741 @@
+# Stress topology: 1 core router + 6 access switches + 30 hosts (37 devices).
+# No positions or canvas: exercises the browser's automatic tiered layout.
+topology:
+  name: "Campus Stress Test"
+  description: "One core router fans out to six access switches, each serving five hosts."
+  summary: "37 devices across six /24 pods behind a single core router"
+  default_source: "P1-H1"
+  default_destination: "P6-H5"
+
+nodes:
+  - name: "CORE-RTR"
+    type: router
+    loopback: "10.255.255.1"
+    interfaces:
+      - name: "pod1"
+        ip: "10.0.1.1"
+        mask: 24
+      - name: "pod2"
+        ip: "10.0.2.1"
+        mask: 24
+      - name: "pod3"
+        ip: "10.0.3.1"
+        mask: 24
+      - name: "pod4"
+        ip: "10.0.4.1"
+        mask: 24
+      - name: "pod5"
+        ip: "10.0.5.1"
+        mask: 24
+      - name: "pod6"
+        ip: "10.0.6.1"
+        mask: 24
+
+  - name: "P1-SW"
+    type: switch
+    interfaces:
+      - name: "uplink"
+        mode: access
+        vlan: 1
+      - name: "eth1"
+        mode: access
+        vlan: 1
+      - name: "eth2"
+        mode: access
+        vlan: 1
+      - name: "eth3"
+        mode: access
+        vlan: 1
+      - name: "eth4"
+        mode: access
+        vlan: 1
+      - name: "eth5"
+        mode: access
+        vlan: 1
+
+  - name: "P1-H1"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.1.11"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.1.1"
+        interface: "eth0"
+
+  - name: "P1-H2"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.1.12"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.1.1"
+        interface: "eth0"
+
+  - name: "P1-H3"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.1.13"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.1.1"
+        interface: "eth0"
+
+  - name: "P1-H4"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.1.14"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.1.1"
+        interface: "eth0"
+
+  - name: "P1-H5"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.1.15"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.1.1"
+        interface: "eth0"
+
+  - name: "P2-SW"
+    type: switch
+    interfaces:
+      - name: "uplink"
+        mode: access
+        vlan: 1
+      - name: "eth1"
+        mode: access
+        vlan: 1
+      - name: "eth2"
+        mode: access
+        vlan: 1
+      - name: "eth3"
+        mode: access
+        vlan: 1
+      - name: "eth4"
+        mode: access
+        vlan: 1
+      - name: "eth5"
+        mode: access
+        vlan: 1
+
+  - name: "P2-H1"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.2.11"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.2.1"
+        interface: "eth0"
+
+  - name: "P2-H2"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.2.12"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.2.1"
+        interface: "eth0"
+
+  - name: "P2-H3"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.2.13"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.2.1"
+        interface: "eth0"
+
+  - name: "P2-H4"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.2.14"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.2.1"
+        interface: "eth0"
+
+  - name: "P2-H5"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.2.15"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.2.1"
+        interface: "eth0"
+
+  - name: "P3-SW"
+    type: switch
+    interfaces:
+      - name: "uplink"
+        mode: access
+        vlan: 1
+      - name: "eth1"
+        mode: access
+        vlan: 1
+      - name: "eth2"
+        mode: access
+        vlan: 1
+      - name: "eth3"
+        mode: access
+        vlan: 1
+      - name: "eth4"
+        mode: access
+        vlan: 1
+      - name: "eth5"
+        mode: access
+        vlan: 1
+
+  - name: "P3-H1"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.3.11"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.3.1"
+        interface: "eth0"
+
+  - name: "P3-H2"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.3.12"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.3.1"
+        interface: "eth0"
+
+  - name: "P3-H3"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.3.13"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.3.1"
+        interface: "eth0"
+
+  - name: "P3-H4"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.3.14"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.3.1"
+        interface: "eth0"
+
+  - name: "P3-H5"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.3.15"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.3.1"
+        interface: "eth0"
+
+  - name: "P4-SW"
+    type: switch
+    interfaces:
+      - name: "uplink"
+        mode: access
+        vlan: 1
+      - name: "eth1"
+        mode: access
+        vlan: 1
+      - name: "eth2"
+        mode: access
+        vlan: 1
+      - name: "eth3"
+        mode: access
+        vlan: 1
+      - name: "eth4"
+        mode: access
+        vlan: 1
+      - name: "eth5"
+        mode: access
+        vlan: 1
+
+  - name: "P4-H1"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.4.11"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.4.1"
+        interface: "eth0"
+
+  - name: "P4-H2"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.4.12"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.4.1"
+        interface: "eth0"
+
+  - name: "P4-H3"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.4.13"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.4.1"
+        interface: "eth0"
+
+  - name: "P4-H4"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.4.14"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.4.1"
+        interface: "eth0"
+
+  - name: "P4-H5"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.4.15"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.4.1"
+        interface: "eth0"
+
+  - name: "P5-SW"
+    type: switch
+    interfaces:
+      - name: "uplink"
+        mode: access
+        vlan: 1
+      - name: "eth1"
+        mode: access
+        vlan: 1
+      - name: "eth2"
+        mode: access
+        vlan: 1
+      - name: "eth3"
+        mode: access
+        vlan: 1
+      - name: "eth4"
+        mode: access
+        vlan: 1
+      - name: "eth5"
+        mode: access
+        vlan: 1
+
+  - name: "P5-H1"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.5.11"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.5.1"
+        interface: "eth0"
+
+  - name: "P5-H2"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.5.12"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.5.1"
+        interface: "eth0"
+
+  - name: "P5-H3"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.5.13"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.5.1"
+        interface: "eth0"
+
+  - name: "P5-H4"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.5.14"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.5.1"
+        interface: "eth0"
+
+  - name: "P5-H5"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.5.15"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.5.1"
+        interface: "eth0"
+
+  - name: "P6-SW"
+    type: switch
+    interfaces:
+      - name: "uplink"
+        mode: access
+        vlan: 1
+      - name: "eth1"
+        mode: access
+        vlan: 1
+      - name: "eth2"
+        mode: access
+        vlan: 1
+      - name: "eth3"
+        mode: access
+        vlan: 1
+      - name: "eth4"
+        mode: access
+        vlan: 1
+      - name: "eth5"
+        mode: access
+        vlan: 1
+
+  - name: "P6-H1"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.6.11"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.6.1"
+        interface: "eth0"
+
+  - name: "P6-H2"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.6.12"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.6.1"
+        interface: "eth0"
+
+  - name: "P6-H3"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.6.13"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.6.1"
+        interface: "eth0"
+
+  - name: "P6-H4"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.6.14"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.6.1"
+        interface: "eth0"
+
+  - name: "P6-H5"
+    type: host
+    interfaces:
+      - name: "eth0"
+        ip: "10.0.6.15"
+        mask: 24
+    routes:
+      - destination: "10.0.0.0"
+        mask: 16
+        gateway: "10.0.6.1"
+        interface: "eth0"
+
+links:
+  - from_node: "CORE-RTR"
+    from_interface: "pod1"
+    to_node: "P1-SW"
+    to_interface: "uplink"
+    cost: 1
+
+  - from_node: "P1-H1"
+    from_interface: "eth0"
+    to_node: "P1-SW"
+    to_interface: "eth1"
+    cost: 1
+
+  - from_node: "P1-H2"
+    from_interface: "eth0"
+    to_node: "P1-SW"
+    to_interface: "eth2"
+    cost: 1
+
+  - from_node: "P1-H3"
+    from_interface: "eth0"
+    to_node: "P1-SW"
+    to_interface: "eth3"
+    cost: 1
+
+  - from_node: "P1-H4"
+    from_interface: "eth0"
+    to_node: "P1-SW"
+    to_interface: "eth4"
+    cost: 1
+
+  - from_node: "P1-H5"
+    from_interface: "eth0"
+    to_node: "P1-SW"
+    to_interface: "eth5"
+    cost: 1
+
+  - from_node: "CORE-RTR"
+    from_interface: "pod2"
+    to_node: "P2-SW"
+    to_interface: "uplink"
+    cost: 1
+
+  - from_node: "P2-H1"
+    from_interface: "eth0"
+    to_node: "P2-SW"
+    to_interface: "eth1"
+    cost: 1
+
+  - from_node: "P2-H2"
+    from_interface: "eth0"
+    to_node: "P2-SW"
+    to_interface: "eth2"
+    cost: 1
+
+  - from_node: "P2-H3"
+    from_interface: "eth0"
+    to_node: "P2-SW"
+    to_interface: "eth3"
+    cost: 1
+
+  - from_node: "P2-H4"
+    from_interface: "eth0"
+    to_node: "P2-SW"
+    to_interface: "eth4"
+    cost: 1
+
+  - from_node: "P2-H5"
+    from_interface: "eth0"
+    to_node: "P2-SW"
+    to_interface: "eth5"
+    cost: 1
+
+  - from_node: "CORE-RTR"
+    from_interface: "pod3"
+    to_node: "P3-SW"
+    to_interface: "uplink"
+    cost: 1
+
+  - from_node: "P3-H1"
+    from_interface: "eth0"
+    to_node: "P3-SW"
+    to_interface: "eth1"
+    cost: 1
+
+  - from_node: "P3-H2"
+    from_interface: "eth0"
+    to_node: "P3-SW"
+    to_interface: "eth2"
+    cost: 1
+
+  - from_node: "P3-H3"
+    from_interface: "eth0"
+    to_node: "P3-SW"
+    to_interface: "eth3"
+    cost: 1
+
+  - from_node: "P3-H4"
+    from_interface: "eth0"
+    to_node: "P3-SW"
+    to_interface: "eth4"
+    cost: 1
+
+  - from_node: "P3-H5"
+    from_interface: "eth0"
+    to_node: "P3-SW"
+    to_interface: "eth5"
+    cost: 1
+
+  - from_node: "CORE-RTR"
+    from_interface: "pod4"
+    to_node: "P4-SW"
+    to_interface: "uplink"
+    cost: 1
+
+  - from_node: "P4-H1"
+    from_interface: "eth0"
+    to_node: "P4-SW"
+    to_interface: "eth1"
+    cost: 1
+
+  - from_node: "P4-H2"
+    from_interface: "eth0"
+    to_node: "P4-SW"
+    to_interface: "eth2"
+    cost: 1
+
+  - from_node: "P4-H3"
+    from_interface: "eth0"
+    to_node: "P4-SW"
+    to_interface: "eth3"
+    cost: 1
+
+  - from_node: "P4-H4"
+    from_interface: "eth0"
+    to_node: "P4-SW"
+    to_interface: "eth4"
+    cost: 1
+
+  - from_node: "P4-H5"
+    from_interface: "eth0"
+    to_node: "P4-SW"
+    to_interface: "eth5"
+    cost: 1
+
+  - from_node: "CORE-RTR"
+    from_interface: "pod5"
+    to_node: "P5-SW"
+    to_interface: "uplink"
+    cost: 1
+
+  - from_node: "P5-H1"
+    from_interface: "eth0"
+    to_node: "P5-SW"
+    to_interface: "eth1"
+    cost: 1
+
+  - from_node: "P5-H2"
+    from_interface: "eth0"
+    to_node: "P5-SW"
+    to_interface: "eth2"
+    cost: 1
+
+  - from_node: "P5-H3"
+    from_interface: "eth0"
+    to_node: "P5-SW"
+    to_interface: "eth3"
+    cost: 1
+
+  - from_node: "P5-H4"
+    from_interface: "eth0"
+    to_node: "P5-SW"
+    to_interface: "eth4"
+    cost: 1
+
+  - from_node: "P5-H5"
+    from_interface: "eth0"
+    to_node: "P5-SW"
+    to_interface: "eth5"
+    cost: 1
+
+  - from_node: "CORE-RTR"
+    from_interface: "pod6"
+    to_node: "P6-SW"
+    to_interface: "uplink"
+    cost: 1
+
+  - from_node: "P6-H1"
+    from_interface: "eth0"
+    to_node: "P6-SW"
+    to_interface: "eth1"
+    cost: 1
+
+  - from_node: "P6-H2"
+    from_interface: "eth0"
+    to_node: "P6-SW"
+    to_interface: "eth2"
+    cost: 1
+
+  - from_node: "P6-H3"
+    from_interface: "eth0"
+    to_node: "P6-SW"
+    to_interface: "eth3"
+    cost: 1
+
+  - from_node: "P6-H4"
+    from_interface: "eth0"
+    to_node: "P6-SW"
+    to_interface: "eth4"
+    cost: 1
+
+  - from_node: "P6-H5"
+    from_interface: "eth0"
+    to_node: "P6-SW"
+    to_interface: "eth5"
+    cost: 1

@@ -1,0 +1,39 @@
+# Expected result: the ping fails because User-PC is assigned to VLAN 20 while
+# File-SRV is assigned to VLAN 10, preventing the ARP broadcast from reaching it.
+topology:
+  name: "Access VLAN Mismatch"
+  description: "A workstation retains its VLAN 10 address after moving to a switchport assigned to VLAN 20."
+  summary: "User-PC on VLAN 20 → File-SRV on VLAN 10 · ARP failure expected"
+  default_source: "User-PC"
+  default_destination: "File-SRV"
+  canvas:
+    width: 1000
+    height: 520
+
+nodes:
+  - name: "User-PC"
+    type: host
+    position: {x: 180, y: 260}
+    interfaces:
+      - name: "eth0"
+        ip: "192.168.10.10"
+        mask: 24
+
+  - name: "Access-SW"
+    type: switch
+    position: {x: 500, y: 260}
+    interfaces:
+      - {name: "user-port", mode: access, vlan: 20}
+      - {name: "server-port", mode: access, vlan: 10}
+
+  - name: "File-SRV"
+    type: host
+    position: {x: 820, y: 260}
+    interfaces:
+      - name: "eth0"
+        ip: "192.168.10.20"
+        mask: 24
+
+links:
+  - {from_node: "User-PC", from_interface: "eth0", to_node: "Access-SW", to_interface: "user-port", cost: 4}
+  - {from_node: "Access-SW", from_interface: "server-port", to_node: "File-SRV", to_interface: "eth0", cost: 4}

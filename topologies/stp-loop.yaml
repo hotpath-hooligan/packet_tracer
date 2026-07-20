@@ -1,0 +1,66 @@
+# Redundant switched fabric protected by the spanning tree (IEEE 802.1D)
+#
+#            H1                       H2
+#            |                        |
+#          [SW1] ---------------- [SW2]
+#             \                    /
+#              \                  /
+#               ------ [SW3] -----
+#
+# The three bridges form a loop. Without a spanning tree a single broadcast
+# would circulate forever. SW1 is given the best priority so it is elected as
+# the root bridge; one port on the SW2-SW3 segment is then blocked, leaving a
+# loop-free tree that still connects both hosts.
+
+topology:
+  name: "Spanning Tree Loop"
+  description: "Three bridges wired in a triangle, kept loop-free by 802.1D"
+  summary: "Ping H1 to H2 and watch the blocked port stay silent"
+  default_source: H1
+  default_destination: H2
+
+nodes:
+  - name: H1
+    type: host
+    interfaces:
+      - name: eth0
+        ip: 10.0.1.10
+        mask: 24
+
+  - name: H2
+    type: host
+    interfaces:
+      - name: eth0
+        ip: 10.0.1.20
+        mask: 24
+
+  # The lowest priority wins the root bridge election.
+  - name: SW1
+    type: switch
+    stp_priority: 4096
+    interfaces:
+      - {name: eth0, mode: access, vlan: 1}
+      - {name: eth1, mode: access, vlan: 1}
+      - {name: eth2, mode: access, vlan: 1}
+
+  - name: SW2
+    type: switch
+    stp_priority: 8192
+    interfaces:
+      - {name: eth0, mode: access, vlan: 1}
+      - {name: eth1, mode: access, vlan: 1}
+      - {name: eth2, mode: access, vlan: 1}
+
+  - name: SW3
+    type: switch
+    stp_priority: 32768
+    interfaces:
+      - {name: eth0, mode: access, vlan: 1}
+      - {name: eth1, mode: access, vlan: 1}
+
+links:
+  - {from_node: H1, from_interface: eth0, to_node: SW1, to_interface: eth2, cost: 1}
+  - {from_node: H2, from_interface: eth0, to_node: SW2, to_interface: eth2, cost: 1}
+  - {from_node: SW1, from_interface: eth0, to_node: SW2, to_interface: eth0, cost: 1}
+  - {from_node: SW2, from_interface: eth1, to_node: SW3, to_interface: eth0, cost: 1}
+  - {from_node: SW3, from_interface: eth1, to_node: SW1, to_interface: eth1, cost: 1}

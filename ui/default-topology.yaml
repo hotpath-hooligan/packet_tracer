@@ -1,0 +1,87 @@
+topology:
+  name: "Inter-VLAN Routing Test"
+  description: "Three hosts connect to a switch that routes between VLAN 10 and VLAN 20."
+  summary: "H1 and H3 · VLAN 10 → SW1 → H2 · VLAN 20"
+  default_source: "H1"
+  default_destination: "H2"
+  canvas: {width: 1000, height: 520}
+
+nodes:
+  - name: H1
+    position: {x: 160, y: 150}
+    loopback: 1.1.1.1
+    interfaces:
+      - name: eth0
+        ip: 10.1.1.10
+        mask: 24
+    routes:
+      - destination: 10.2.2.0
+        mask: 24
+        gateway: 10.1.1.1
+        interface: eth0
+
+  - name: H2
+    position: {x: 160, y: 370}
+    loopback: 2.2.2.2
+    interfaces:
+      - name: eth0
+        ip: 10.2.2.20
+        mask: 24
+    routes:
+      - destination: 10.1.1.0
+        mask: 24
+        gateway: 10.2.2.1
+        interface: eth0
+
+  - name: H3
+    position: {x: 840, y: 150}
+    loopback: 3.3.3.3
+    interfaces:
+      - name: eth0
+        ip: 10.1.1.30
+        mask: 24
+    routes:
+      - destination: 10.2.2.0
+        mask: 24
+        gateway: 10.1.1.1
+        interface: eth0
+
+  - name: SW1
+    position: {x: 500, y: 260}
+    loopback: 100.100.100.100
+    vlan_interfaces:
+      - vlan: 10
+        ip: 10.1.1.1
+        mask: 24
+      - vlan: 20
+        ip: 10.2.2.1
+        mask: 24
+    interfaces:
+      - name: eth0
+        mode: access
+        vlan: 10
+      - name: eth1
+        mode: access
+        vlan: 20
+      - name: eth2
+        mode: access
+        vlan: 10
+
+links:
+  - from_node: H1
+    from_interface: eth0
+    to_node: SW1
+    to_interface: eth0
+    cost: 1
+
+  - from_node: H2
+    from_interface: eth0
+    to_node: SW1
+    to_interface: eth1
+    cost: 1
+
+  - from_node: H3
+    from_interface: eth0
+    to_node: SW1
+    to_interface: eth2
+    cost: 1

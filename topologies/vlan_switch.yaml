@@ -1,0 +1,83 @@
+topology:
+  name: "VLAN-Aware L2 Switch Topology"
+
+nodes:
+  - name: "L2Sw"
+    # VLAN-aware L2 switch
+    # Ports eth0/1 and eth0/2 are access ports on VLAN 10
+    # Ports eth0/3 and eth0/4 are access ports on VLAN 20
+    interfaces:
+      - name: "eth0/1"
+        mode: "access"
+        vlan: 10
+        
+      - name: "eth0/2"
+        mode: "access"
+        vlan: 10
+        
+      - name: "eth0/3"
+        mode: "access"
+        vlan: 20
+        
+      - name: "eth0/4"
+        mode: "access"
+        vlan: 20
+    
+  - name: "H1"
+    # Host on VLAN 10
+    loopback: "122.1.1.1"
+    interfaces:
+      - name: "eth0/5"
+        ip: "10.1.1.1"
+        mask: 24
+    
+  - name: "H2"
+    # Host on VLAN 10
+    loopback: "122.1.1.2"
+    interfaces:
+      - name: "eth0/6"
+        ip: "10.1.1.2"
+        mask: 24
+    
+  - name: "H3"
+    # Host on VLAN 20
+    loopback: "122.1.1.3"
+    interfaces:
+      - name: "eth0/7"
+        ip: "10.2.1.1"
+        mask: 24
+    
+  - name: "H4"
+    # Host on VLAN 20
+    loopback: "122.1.1.4"
+    interfaces:
+      - name: "eth0/8"
+        ip: "10.2.1.2"
+        mask: 24
+
+links:
+  # H1 and H2 connected to L2Sw ports on VLAN 10
+  - from_node: "H1"
+    from_interface: "eth0/5"
+    to_node: "L2Sw"
+    to_interface: "eth0/1"
+    cost: 1
+
+  - from_node: "H2"
+    from_interface: "eth0/6"
+    to_node: "L2Sw"
+    to_interface: "eth0/2"
+    cost: 1
+
+  # H3 and H4 connected to L2Sw ports on VLAN 20
+  - from_node: "H3"
+    from_interface: "eth0/7"
+    to_node: "L2Sw"
+    to_interface: "eth0/3"
+    cost: 1
+
+  - from_node: "H4"
+    from_interface: "eth0/8"
+    to_node: "L2Sw"
+    to_interface: "eth0/4"
+    cost: 1

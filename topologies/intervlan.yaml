@@ -1,0 +1,91 @@
+# Inter-VLAN Routing Test Topology
+# 
+# This topology demonstrates inter-VLAN routing using SVIs
+# 
+# Topology:
+#   H1 (VLAN 10) --- SW1 (L2/L3 Switch) --- H2 (VLAN 20)
+#                         |
+#                       H3 (VLAN 10)
+#
+# SW1 acts as both L2 switch and L3 router with VLAN interfaces (SVIs)
+# - VLAN 10: 10.1.1.1/24
+# - VLAN 20: 10.2.2.1/24
+
+topology:
+  name: "Inter-VLAN Routing Test"
+
+nodes:
+  - name: H1
+    loopback: 1.1.1.1
+    interfaces:
+      - name: eth0
+        ip: 10.1.1.10
+        mask: 24
+    routes:
+      - destination: 10.2.2.0
+        mask: 24
+        gateway: 10.1.1.1
+        interface: eth0
+        
+  - name: H2
+    loopback: 2.2.2.2
+    interfaces:
+      - name: eth0
+        ip: 10.2.2.20
+        mask: 24
+    routes:
+      - destination: 10.1.1.0
+        mask: 24
+        gateway: 10.2.2.1
+        interface: eth0
+        
+  - name: H3
+    loopback: 3.3.3.3
+    interfaces:
+      - name: eth0
+        ip: 10.1.1.30
+        mask: 24
+    routes:
+      - destination: 10.2.2.0
+        mask: 24
+        gateway: 10.1.1.1
+        interface: eth0
+        
+  - name: SW1
+    loopback: 100.100.100.100
+    vlan_interfaces:
+      - vlan: 10
+        ip: 10.1.1.1
+        mask: 24
+      - vlan: 20
+        ip: 10.2.2.1
+        mask: 24
+    interfaces:
+      - name: eth0
+        mode: access
+        vlan: 10
+      - name: eth1
+        mode: access
+        vlan: 20
+      - name: eth2
+        mode: access
+        vlan: 10
+
+links:
+  - from_node: H1
+    from_interface: eth0
+    to_node: SW1
+    to_interface: eth0
+    cost: 1
+
+  - from_node: H2
+    from_interface: eth0
+    to_node: SW1
+    to_interface: eth1
+    cost: 1
+
+  - from_node: H3
+    from_interface: eth0
+    to_node: SW1
+    to_interface: eth2
+    cost: 1

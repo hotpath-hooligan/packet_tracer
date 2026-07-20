@@ -1,0 +1,85 @@
+# Expected result: User-A in VLAN 10 reaches App-SRV in VLAN 20 through the
+# Core-SW SVIs while STP blocks one redundant access-layer path.
+topology:
+  name: "Campus VLAN and Routing"
+  description: "A campus core routes between user and server VLANs carried over redundant 802.1Q access and distribution links."
+  summary: "User-A · VLAN 10 → Core-SW SVIs → App-SRV · VLAN 20"
+  default_source: "User-A"
+  default_destination: "App-SRV"
+  canvas:
+    width: 1400
+    height: 760
+
+nodes:
+  - name: "Core-SW"
+    type: switch
+    lldp: true
+    position: {x: 700, y: 90}
+    stp_priority: 4096
+    vlan_interfaces:
+      - {vlan: 10, ip: "10.10.10.1", mask: 24}
+      - {vlan: 20, ip: "10.20.20.1", mask: 24}
+    interfaces:
+      - {name: "to-dist", mode: trunk, native_vlan: 99, allowed_vlans: [10, 20, 99]}
+
+  - name: "Dist-SW"
+    type: switch
+    lldp: true
+    position: {x: 700, y: 280}
+    stp_priority: 8192
+    interfaces:
+      - {name: "to-core", mode: trunk, native_vlan: 99, allowed_vlans: [10, 20, 99]}
+      - {name: "to-acc1", mode: trunk, native_vlan: 99, allowed_vlans: [10, 20, 99]}
+      - {name: "to-acc2", mode: trunk, native_vlan: 99, allowed_vlans: [10, 20, 99]}
+
+  - name: "Access-SW1"
+    type: switch
+    lldp: true
+    position: {x: 420, y: 500}
+    interfaces:
+      - {name: "to-dist", mode: trunk, native_vlan: 99, allowed_vlans: [10, 20, 99]}
+      - {name: "to-acc2", mode: trunk, native_vlan: 99, allowed_vlans: [10, 20, 99]}
+      - {name: "user-a", mode: access, vlan: 10}
+
+  - name: "Access-SW2"
+    type: switch
+    lldp: true
+    position: {x: 980, y: 500}
+    interfaces:
+      - {name: "to-dist", mode: trunk, native_vlan: 99, allowed_vlans: [10, 20, 99]}
+      - {name: "to-acc1", mode: trunk, native_vlan: 99, allowed_vlans: [10, 20, 99]}
+      - {name: "user-b", mode: access, vlan: 10}
+      - {name: "server", mode: access, vlan: 20}
+
+  - name: "User-A"
+    type: host
+    position: {x: 150, y: 650}
+    interfaces:
+      - {name: "eth0", ip: "10.10.10.11", mask: 24}
+    routes:
+      - {destination: "10.20.20.0", mask: 24, gateway: "10.10.10.1", interface: "eth0"}
+
+  - name: "User-B"
+    type: host
+    position: {x: 980, y: 690}
+    interfaces:
+      - {name: "eth0", ip: "10.10.10.12", mask: 24}
+    routes:
+      - {destination: "10.20.20.0", mask: 24, gateway: "10.10.10.1", interface: "eth0"}
+
+  - name: "App-SRV"
+    type: host
+    position: {x: 1250, y: 650}
+    interfaces:
+      - {name: "eth0", ip: "10.20.20.20", mask: 24}
+    routes:
+      - {destination: "10.10.10.0", mask: 24, gateway: "10.20.20.1", interface: "eth0"}
+
+links:
+  - {from_node: "Core-SW", from_interface: "to-dist", to_node: "Dist-SW", to_interface: "to-core", cost: 4}
+  - {from_node: "Dist-SW", from_interface: "to-acc1", to_node: "Access-SW1", to_interface: "to-dist", cost: 4}
+  - {from_node: "Dist-SW", from_interface: "to-acc2", to_node: "Access-SW2", to_interface: "to-dist", cost: 4}
+  - {from_node: "Access-SW1", from_interface: "to-acc2", to_node: "Access-SW2", to_interface: "to-acc1", cost: 8}
+  - {from_node: "User-A", from_interface: "eth0", to_node: "Access-SW1", to_interface: "user-a", cost: 4}
+  - {from_node: "User-B", from_interface: "eth0", to_node: "Access-SW2", to_interface: "user-b", cost: 4}
+  - {from_node: "Access-SW2", from_interface: "server", to_node: "App-SRV", to_interface: "eth0", cost: 4}

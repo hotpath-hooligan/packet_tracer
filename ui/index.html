@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="An interactive packet flow visualizer for the Go network simulator">
+    <title>Packet Tracer Demo</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell" id="appShell">
+      <header class="topbar">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div>
+            <p class="eyebrow">Network simulator</p>
+            <h1>Packet Tracer <span>Demo</span></h1>
+          </div>
+        </div>
+
+        <div class="scenario-block">
+          <label class="scenario-label" for="scenarioSelect">Scenario</label>
+          <div class="scenario-details">
+            <div class="scenario-picker" id="scenarioPicker">
+              <button class="scenario-trigger" id="scenarioSelect" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="scenarioMenu" aria-describedby="scenarioMeta">
+                <span id="scenarioName">Loading scenario…</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>
+              </button>
+              <div class="scenario-menu" id="scenarioMenu" role="menu" aria-label="Scenarios" hidden>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="false" data-scenario="switched-lan">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">Switched LAN connectivity</span>
+                </button>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="false" data-scenario="multi-switch-vlan-trunking">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">Multi-switch VLAN trunking</span>
+                </button>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="false" data-scenario="access-vlan-mismatch">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">Access VLAN mismatch</span>
+                </button>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="false" data-scenario="trunk-allowed-vlan-mismatch">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">Trunk allowed VLAN mismatch</span>
+                </button>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="true" data-scenario="inter-vlan-routing">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">Inter-VLAN routing</span>
+                </button>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="false" data-scenario="static-routing-between-sites">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">Static routing between sites</span>
+                </button>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="false" data-scenario="default-gateway-misconfiguration">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">Default gateway misconfiguration</span>
+                </button>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="false" data-scenario="missing-return-route">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">Missing return route</span>
+                </button>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="false" data-scenario="longest-prefix-route-selection">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">Longest-prefix route selection</span>
+                </button>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="false" data-scenario="stp-redundant-topology">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">STP redundant topology</span>
+                </button>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="false" data-scenario="stp-uplink-failover">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">STP uplink failover</span>
+                </button>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="false" data-scenario="lldp-neighbor-discovery">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">LLDP neighbor discovery</span>
+                </button>
+                <button class="scenario-option" type="button" role="menuitemradio" aria-checked="false" data-scenario="campus-vlan-routing">
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">Campus VLAN and routing</span>
+                </button>
+                <button class="scenario-option" id="customScenarioOption" type="button" role="menuitemradio" aria-checked="false" data-scenario="custom" hidden>
+                  <span class="scenario-option-check" aria-hidden="true">✓</span>
+                  <span class="scenario-option-name">Custom YAML</span>
+                </button>
+                <div class="scenario-menu-divider" role="separator"></div>
+                <button class="scenario-download" id="downloadScenarioButton" type="button" role="menuitem">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
+                  <span><strong>Download selected YAML</strong><small id="downloadScenarioName">Loading scenario…</small></span>
+                </button>
+              </div>
+            </div>
+            <span id="scenarioMeta">Loading topology data…</span>
+          </div>
+        </div>
+
+        <div class="toolbar" role="group" aria-label="Simulation controls">
+          <input id="yamlInput" type="file" accept=".yaml,.yml,text/yaml" hidden>
+          <button class="button button-secondary" id="loadButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
+            Load YAML
+          </button>
+          <div class="button-group">
+            <button class="icon-button" id="previousEventButton" type="button" title="Previous event" aria-label="Previous event" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14M18 6l-8 6 8 6z"/></svg>
+            </button>
+            <button class="icon-button playback-button" id="playPauseButton" type="button" title="Play the captured trace" aria-label="Play trace" disabled>
+              <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="fill-shape" d="m8 5 11 7-11 7z"/></svg>
+              <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg>
+            </button>
+            <button class="icon-button" id="nextEventButton" type="button" title="Next event" aria-label="Next event" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 5v14M6 6l8 6-8 6z"/></svg>
+            </button>
+            <button class="icon-button" id="resetButton" type="button" title="Reset simulation" aria-label="Reset simulation">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7v5h5M5.8 16a7 7 0 1 0 .2-8.2L4 10"/></svg>
+            </button>
+          </div>
+          <label class="trace-kind" for="traceType">
+            <span>Trace</span>
+            <select id="traceType" aria-label="Trace protocol">
+              <option value="ping">Ping</option>
+              <option value="traceroute">Traceroute</option>
+              <option value="lldp">LLDP</option>
+            </select>
+          </label>
+          <div class="trace-endpoints" id="traceEndpoints" aria-label="Trace endpoints">
+            <label><span>From</span><select id="sourceNode" aria-label="Trace source"></select></label>
+            <span aria-hidden="true">→</span>
+            <label class="destination-endpoint">
+              <span>To · node or IPv4</span>
+              <input id="destinationNode" type="text" list="destinationOptions" aria-label="Trace destination node or IPv4 address" placeholder="Node or IPv4" autocomplete="off" spellcheck="false">
+            </label>
+            <datalist id="destinationOptions"></datalist>
+          </div>
+          <button class="button button-primary" id="traceButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h11m0 0-4-4m4 4-4 4M5 5h14v14H5z"/></svg>
+            <span id="traceButtonLabel">Run Ping</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="panel device-panel" aria-labelledby="devicesHeading">
+          <div class="panel-heading">
+            <div class="panel-heading-title">
+              <p class="eyebrow">Topology</p>
+              <h2 id="devicesHeading">Devices</h2>
+            </div>
+            <div class="panel-heading-actions">
+              <span class="count-badge" id="deviceCount">4</span>
+              <button class="collapse-toggle" id="devicesCollapseToggle" type="button" data-collapse="devices" aria-expanded="true" aria-controls="devicePanelBody" aria-label="Collapse devices panel">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="panel-body" id="devicePanelBody">
+          <label class="search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg>
+            <span class="sr-only">Filter devices</span>
+            <input id="deviceSearch" type="search" placeholder="Find a device">
+          </label>
+          <div class="device-list" id="deviceList"></div>
+          <div class="protocol-key">
+            <div class="protocol-key-heading">
+              <p class="section-label">Packet key</p>
+              <button class="protocol-help-button" id="protocolHelpButton" type="button" aria-label="Explain packet types" aria-haspopup="dialog" aria-expanded="false" aria-controls="protocolHelpPopover">i</button>
+            </div>
+            <div class="protocol-help-popover" id="protocolHelpPopover" role="dialog" aria-labelledby="protocolHelpTitle" tabindex="-1" hidden>
+              <div class="protocol-help-heading">
+                <strong id="protocolHelpTitle">Packet types</strong>
+                <button class="protocol-help-close" id="protocolHelpClose" type="button" aria-label="Close packet type help">×</button>
+              </div>
+              <dl>
+                <div><dt>ICMP</dt><dd>Sends ping and traceroute probes, replies, and hop-limit errors.</dd></div>
+                <div><dt>ARP</dt><dd>Finds the hardware (MAC) address for an IPv4 address on the local network.</dd></div>
+                <div><dt>LLDP</dt><dd>Helps directly connected network devices identify each other.</dd></div>
+                <div><dt>STP</dt><dd>Keeps redundant switched paths loop-free by placing one or more ports in a blocking state.</dd></div>
+                <div><dt>Ethernet</dt><dd>Switch-level frame handling, such as learning which MAC address sits behind which port.</dd></div>
+                <div><dt>Dropped</dt><dd>The packet could not continue. Select its timeline event to see why.</dd></div>
+              </dl>
+            </div>
+            <div class="protocol-key-item"><span class="key-dot key-icmp"></span><span>ICMP unicast</span></div>
+            <div class="protocol-key-item"><span class="key-dot key-arp"></span><span>ARP broadcast</span></div>
+            <div class="protocol-key-item"><span class="key-dot key-lldp"></span><span>LLDP discovery</span></div>
+            <div class="protocol-key-item"><span class="key-dot key-stp"></span><span>STP blocked port</span></div>
+            <div class="protocol-key-item"><span class="key-dot key-ethernet"></span><span>Ethernet switching</span></div>
+            <div class="protocol-key-item"><span class="key-dot key-drop"></span><span>Dropped packet</span></div>
+          </div>
+          </div>
+        </aside>
+
+        <section class="panel canvas-panel" aria-labelledby="canvasHeading">
+          <div class="canvas-heading">
+            <div>
+              <div class="heading-line">
+                <h2 id="canvasHeading">Packet Flow</h2>
+                <span class="live-badge"><i></i><span class="sr-only">Simulator status: </span><span id="runState" aria-live="polite">Starting simulator</span></span>
+              </div>
+              <p id="canvasSubtitle">Loading topology description…</p>
+            </div>
+            <div class="canvas-stats">
+              <div><span>Step</span><strong id="stepCounter">0 / 0</strong></div>
+            </div>
+          </div>
+
+          <div class="traceroute-summary" id="tracerouteSummary" aria-live="polite" hidden>
+            <div class="traceroute-summary-label">
+              <strong>Traceroute result</strong>
+              <span>One response per TTL · * means no reply</span>
+            </div>
+            <ol id="tracerouteHopList"></ol>
+          </div>
+
+          <div class="topology-stage" id="topologyStage">
+            <div class="topology-scroll" id="topologyScroll" tabindex="0" aria-label="Scrollable packet flow diagram">
+              <div class="topology-surface" id="topologySurface">
+                <svg class="link-layer" id="linkLayer" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <filter id="linkGlow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="4" result="blur"/>
+                      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                  </defs>
+                </svg>
+                <div class="link-label-layer" id="linkLabelLayer" aria-hidden="true"></div>
+                <div class="node-layer" id="nodeLayer"></div>
+                <div class="packet-marker is-hidden" id="packetMarker" aria-hidden="true"><span></span></div>
+                <div class="drop-marker is-hidden" id="dropMarker" role="img" aria-label="Packet drop point"><span>×</span></div>
+              </div>
+            </div>
+            <div class="location-toast" id="locationToast" aria-live="polite" aria-atomic="true">
+              <span class="location-protocol protocol-system">STARTING</span>
+              <div>
+                <small>Packet activity</small>
+                <strong>Loading network devices and endpoints…</strong>
+              </div>
+            </div>
+            <div class="canvas-hint">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-3.7 10.7L8 17h8l-.3-3.3A6 6 0 0 0 12 3ZM9 21h6"/></svg>
+              Click a device, link status, or timeline event to interact
+            </div>
+          </div>
+        </section>
+
+        <aside class="panel inspector-panel" aria-labelledby="inspectorHeading">
+          <div class="panel-heading inspector-heading">
+            <div class="panel-heading-title">
+              <p class="eyebrow">Selected device</p>
+              <h2 id="inspectorHeading">SW1</h2>
+            </div>
+            <div class="panel-heading-actions">
+              <button class="lldp-toggle" id="lldpToggle" type="button" aria-pressed="false" disabled>Enable LLDP</button>
+              <button class="collapse-toggle" id="inspectorCollapseToggle" type="button" data-collapse="inspector" aria-expanded="true" aria-controls="inspectorContent" aria-label="Collapse selected device panel">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="inspectorContent" class="inspector-content"></div>
+        </aside>
+      </main>
+
+      <section class="timeline-panel" aria-labelledby="timelineHeading">
+        <div class="timeline-toolbar">
+          <div>
+            <div class="heading-line">
+              <h2 id="timelineHeading">Packet timeline</h2>
+              <span class="event-count" id="eventCount">0 events</span>
+            </div>
+            <p id="timelineSubtitle">Important packet decisions, in wire order</p>
+          </div>
+          <div class="timeline-toolbar-actions">
+            <div class="timeline-view-toggle" aria-label="Timeline detail level">
+              <button class="view-chip is-active" data-timeline-mode="SUMMARY" type="button" aria-pressed="true">Summary</button>
+              <button class="view-chip" data-timeline-mode="DETAILS" type="button" aria-pressed="false">Details</button>
+            </div>
+            <div class="timeline-legend" aria-label="Timeline protocol filters">
+              <button class="filter-chip is-active" data-filter="ALL" type="button" aria-pressed="true">All</button>
+              <button class="filter-chip" data-filter="LLDP" type="button" aria-pressed="false"><i class="chip-lldp"></i>LLDP</button>
+              <button class="filter-chip" data-filter="ARP" type="button" aria-pressed="false"><i class="chip-arp"></i>ARP</button>
+              <button class="filter-chip" data-filter="ICMP" type="button" aria-pressed="false"><i class="chip-icmp"></i>ICMP</button>
+              <button class="filter-chip" data-filter="ETHERNET" type="button" aria-pressed="false"><i class="chip-ethernet"></i>Ethernet</button>
+            </div>
+            <button class="timeline-download" id="downloadEventsButton" type="button" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
+              Download JSON
+            </button>
+            <button class="collapse-toggle" id="timelineCollapseToggle" type="button" data-collapse="timeline" aria-expanded="true" aria-controls="timelineBody" aria-label="Collapse packet timeline">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6 6 6-6"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="timeline-layout" id="timelineBody">
+          <div class="event-log">
+            <div class="event-table-head" aria-hidden="true">
+              <span>Time</span>
+              <span>Protocol</span>
+              <span>Path / device</span>
+              <span>Event</span>
+              <span>Result</span>
+            </div>
+            <div class="event-list" id="eventList"></div>
+          </div>
+          <aside class="event-detail" id="eventDetail" aria-live="polite"></aside>
+        </div>
+      </section>
+    </div>
+    <div class="notice" id="notice" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+    <!-- Cloudflare Web Analytics --><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"13efef35c3b24e26899f2b6d74a22694"}'></script><!-- End Cloudflare Web Analytics -->
+  </body>
+</html>

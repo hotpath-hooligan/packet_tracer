@@ -1,0 +1,66 @@
+# Expected workflow: run the baseline ping, bring down Access-SW1:to-d1, then
+# run the ping again. STP reconverges through Dist-SW2 without loss of reachability.
+topology:
+  name: "STP Uplink Failover"
+  description: "Two access switches are dual-homed to two distribution switches; disable Access-SW1 to Dist-SW1 to validate STP failover."
+  summary: "Baseline ping → disable Access-SW1:to-d1 → reconverge through Dist-SW2"
+  default_source: "User-PC"
+  default_destination: "File-SRV"
+  canvas:
+    width: 1200
+    height: 700
+
+nodes:
+  - name: "User-PC"
+    type: host
+    position: {x: 120, y: 350}
+    interfaces:
+      - {name: "eth0", ip: "10.10.10.10", mask: 24}
+
+  - name: "Access-SW1"
+    type: switch
+    position: {x: 360, y: 350}
+    stp_priority: 32768
+    interfaces:
+      - {name: "user", mode: access, vlan: 10}
+      - {name: "to-d1", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+      - {name: "to-d2", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+
+  - name: "Dist-SW1"
+    type: switch
+    position: {x: 600, y: 130}
+    stp_priority: 4096
+    interfaces:
+      - {name: "to-a1", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+      - {name: "to-a2", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+
+  - name: "Dist-SW2"
+    type: switch
+    position: {x: 600, y: 570}
+    stp_priority: 8192
+    interfaces:
+      - {name: "to-a1", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+      - {name: "to-a2", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+
+  - name: "Access-SW2"
+    type: switch
+    position: {x: 840, y: 350}
+    stp_priority: 32768
+    interfaces:
+      - {name: "to-d1", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+      - {name: "to-d2", mode: trunk, native_vlan: 99, allowed_vlans: [10, 99]}
+      - {name: "server", mode: access, vlan: 10}
+
+  - name: "File-SRV"
+    type: host
+    position: {x: 1080, y: 350}
+    interfaces:
+      - {name: "eth0", ip: "10.10.10.20", mask: 24}
+
+links:
+  - {from_node: "User-PC", from_interface: "eth0", to_node: "Access-SW1", to_interface: "user", cost: 4}
+  - {from_node: "Access-SW1", from_interface: "to-d1", to_node: "Dist-SW1", to_interface: "to-a1", cost: 4}
+  - {from_node: "Access-SW1", from_interface: "to-d2", to_node: "Dist-SW2", to_interface: "to-a1", cost: 4}
+  - {from_node: "Dist-SW1", from_interface: "to-a2", to_node: "Access-SW2", to_interface: "to-d1", cost: 4}
+  - {from_node: "Dist-SW2", from_interface: "to-a2", to_node: "Access-SW2", to_interface: "to-d2", cost: 4}
+  - {from_node: "Access-SW2", from_interface: "server", to_node: "File-SRV", to_interface: "eth0", cost: 4}

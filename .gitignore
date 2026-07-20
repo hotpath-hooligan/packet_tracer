@@ -1,0 +1,57 @@
+# Binaries
+tcp-ip-stack
+go-tcp-ip-test
+src/src
+bin/
+
+# Build output
+*.exe
+*.dll
+*.so
+*.dylib
+dist/
+
+# Go vendor
+vendor/
+
+# Go test/coverage
+coverage.out
+*.coverprofile
+
+# Go modules
+Gopkg.lock
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Local AI assistant configuration
+.agents/
+.claude/
+.codex/
+general_guidelines.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Generated files
+**/*.out
+ui/packet-tracer.wasm
+ui/packet-tracer.wasm.gz
+ui/wasm_exec.js
+
+# Dependency directory (for glide, dep, etc.)
+_glide/
+
+# Temporary files
+*.tmp
+
+# Certificates
+*.crt
+*.key
